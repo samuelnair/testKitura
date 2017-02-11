@@ -36,6 +36,7 @@ guard let username = params["username"].string,
 let connectParams = MongoCredentials(username: username , password: password)
 let server = try Server(hostname: hostname, authenticatedAs: connectParams)
 let contentCollection = server[db][collection]
+let contentImageCollection = server[db]["contentimages"]
 
 // Handle HTTP GET requests to /
 router.get("/") {
@@ -49,12 +50,23 @@ router.get("/q") { request, response, _ in
     if let name = request.queryParameters["name"] {
         let searchTerm: Document = [ "_id": name ]
         let query = Query(searchTerm)
-        let docs = try contentCollection.find(matching: query)
-        for doc: Document in docs {
-            if let chinese_name = doc.dictionaryValue["chinese_name"] {
-                try response.send(doc.makeExtendedJSON()).end()
+        let doc = try contentCollection.findOne(matching: query)
+        if var content = doc  {
+            let poster = try contentImageCollection.findOne(matching: query)
+            if let large = poster?.dictionaryValue["large"],
+                let small = poster?.dictionaryValue["small"],
+                let medium = poster?.dictionaryValue["medium"] {
+                content.append(large, forKey: "large")
+                content.append(small, forKey: "small")
+                content.append(medium, forKey: "medium")
             }
         }
+        else {
+            response.send("No Film found")
+            return
+
+        }
+        
     }
 }
 
