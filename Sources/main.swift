@@ -59,14 +59,18 @@ router.get("/q") { request, response, _ in
                 content.append(large, forKey: "large")
                 content.append(small, forKey: "small")
                 content.append(medium, forKey: "medium")
+                try response.send(content.makeExtendedJSON()).end()
+            }
+            else {
+                try response.send("No Poster Found").end()
+                return
             }
         }
         else {
-            response.send("No Film found")
+            try response.send("No Film found").end()
             return
-
         }
-        
+
     }
 }
 
