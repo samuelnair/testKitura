@@ -80,7 +80,7 @@ router.get("/q") { request, response, _ in
     }
 }
 #if os(Linux)
-    let sslConfig =  SSLConfig(withCACertificateDirectory: nil, usingCertificateFile: sslCert, withKeyFile: sslKey, usingSelfSignedCerts: true)
+    let sslConfig =  SSLConfig(withCACertificateDirectory: nil, usingCertificateFile: sslCert, withKeyFile: sslKey, usingSelfSignedCerts: false)
     // Add an HTTP server and connect it to the router
     Kitura.addHTTPServer(onPort: 9099, with: router, withSSL: sslConfig)
 #else
