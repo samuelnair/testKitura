@@ -41,7 +41,7 @@ let contentCollection = server[db][collection]
 let contentImageCollection = server[db]["contentimages"]
 let sslCert = ssldir + "/certificate.pem"
 let sslKey = ssldir + "/key.pem"
-let sslChain = ssldir + "/cert.pfx"
+let sslChain = ssldir + "/fullchain.pem"
 
 
 // Handle HTTP GET requests to /
@@ -80,7 +80,8 @@ router.get("/q") { request, response, _ in
     }
 }
 #if os(Linux)
-    let sslConfig =  SSLConfig(withCACertificateDirectory: nil, usingCertificateFile: sslCert, withKeyFile: sslKey, usingSelfSignedCerts: false)
+//    let sslConfig =  SSLConfig(withCACertificateDirectory: nil, usingCertificateFile: sslCert, withKeyFile: sslKey, usingSelfSignedCerts: false)
+    let sslConfig = SSLConfig(withChainFilePath: sslChain, withPassword: nil, usingSelfSignedCerts: false, cipherSuite: nil)
     // Add an HTTP server and connect it to the router
     Kitura.addHTTPServer(onPort: 9099, with: router, withSSL: sslConfig)
 #else
