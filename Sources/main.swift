@@ -26,7 +26,9 @@ guard let username = params["username"].string,
     let password = params["password"].string,
     let hostname = params["hostname"].string,
     let db = params["db"].string,
-    let collection = params["collection"].string else {
+    let collection = params["collection"].string,
+    let ssldir = params["ssldir"].string,
+    let sslPass = params["sslpass"].string else {
         print("Incorrect JSON")
         exit(255)
 }
@@ -37,6 +39,10 @@ let connectParams = MongoCredentials(username: username , password: password)
 let server = try Server(hostname: hostname, authenticatedAs: connectParams)
 let contentCollection = server[db][collection]
 let contentImageCollection = server[db]["contentimages"]
+let sslCert = ssldir + "/certificate.pem"
+let sslKey = ssldir + "/key.pem"
+let sslChain = ssldir + "/cert.pfx"
+
 
 // Handle HTTP GET requests to /
 router.get("/") {
@@ -73,10 +79,14 @@ router.get("/q") { request, response, _ in
 
     }
 }
+#if os(Linux)
+    let sslConfig =  SSLConfig(withCACertificateDirectory: nil, usingCertificateFile: sslCert, withKeyFile: sslKey, usingSelfSignedCerts: true)
+    // Add an HTTP server and connect it to the router
+    Kitura.addHTTPServer(onPort: 9099, with: router, withSSL: sslConfig)
+#else
+    Kitura.addHTTPServer(onPort: 9099, with: router)
+#endif
 
-
-// Add an HTTP server and connect it to the router
-Kitura.addHTTPServer(onPort: 9099, with: router)
 
 // Start the Kitura runloop (this call never returns)
 Kitura.run()
