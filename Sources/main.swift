@@ -39,9 +39,9 @@ let connectParams = MongoCredentials(username: username , password: password)
 let server = try Server(hostname: hostname, authenticatedAs: connectParams)
 let contentCollection = server[db][collection]
 let contentImageCollection = server[db]["contentimages"]
-let sslCert = ssldir + "/certificate.pem"
-let sslKey = ssldir + "/key.pem"
-let sslChain = ssldir + "/fullchain.pem"
+let sslCert = ssldir + "/cert.pem"
+let sslKey = ssldir + "/privkey.pem"
+let sslChain = ssldir + "/chain.pem"
 
 
 // Handle HTTP GET requests to /
@@ -80,8 +80,7 @@ router.get("/q") { request, response, _ in
     }
 }
 #if os(Linux)
-//    let sslConfig =  SSLConfig(withCACertificateDirectory: nil, usingCertificateFile: sslCert, withKeyFile: sslKey, usingSelfSignedCerts: false)
-    let sslConfig = SSLConfig(withChainFilePath: sslChain, withPassword: nil, usingSelfSignedCerts: false, cipherSuite: nil)
+    let sslConfig =  SSLConfig(withCACertificateFilePath: sslChain, usingCertificateFile: sslCert, withKeyFile: sslKey, usingSelfSignedCerts: false)
     // Add an HTTP server and connect it to the router
     Kitura.addHTTPServer(onPort: 9099, with: router, withSSL: sslConfig)
 #else
